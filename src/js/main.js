@@ -19,9 +19,12 @@ burger?.addEventListener('click', () => {
   navLinks.classList.toggle('is-open')
   document.body.classList.toggle('nav-open')
 })
-// Close menu on link click
+// Close menu on link click (delay closing slightly to avoid scroll-jump)
 navLinks?.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', () => navLinks.classList.remove('is-open'))
+  a.addEventListener('click', () => {
+    // allow browser to perform anchor scroll first, then close menu
+    setTimeout(() => navLinks.classList.remove('is-open'), 160)
+  })
 })
 // ensure body class removed when menu closes via links
 navLinks?.addEventListener('transitionend', () => {

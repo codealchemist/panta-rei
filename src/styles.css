@@ -212,7 +212,7 @@ input[type='range'] {
     right: 0;
     top: var(--nav-h);
     flex-direction: column;
-    gap: 0;
+    gap: 8px;
     background: rgba(13, 13, 13, 0.98);
     backdrop-filter: blur(6px);
     z-index: 200;
@@ -254,10 +254,14 @@ input[type='range'] {
   }
 
   .nav__links a {
+    display: block;
+    position: relative;
+    z-index: 210;
     font-size: 1.1rem;
-    padding: 14px 0;
+    padding: 10px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     color: var(--text);
+    touch-action: manipulation;
   }
 
   .nav__burger {
