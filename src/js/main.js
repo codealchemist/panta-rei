@@ -120,11 +120,11 @@ fetch('/api/config')
     }
 
     // continue with social-disable logic below
-    const social = socialConf || social
+    const finalSocial = socialConf || social
     // Gray out and disable links with no configured URL
     Object.entries(map).forEach(([key, el]) => {
       if (!el) return
-      const hasUrl = Boolean(social[key])
+      const hasUrl = Boolean(finalSocial[key])
       if (!hasUrl) {
         // Preserve existing mailto in markup — only disable placeholder/hash links
         const currentHref = el.getAttribute('href')
