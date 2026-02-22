@@ -65,7 +65,8 @@ export async function initGallery() {
         color: var(--text-muted);
         letter-spacing: 0.1em;
       `
-      placeholder.textContent = item.querySelector('span')?.textContent || 'Photo'
+      placeholder.textContent =
+        item.querySelector('span')?.textContent || 'Photo'
       lightboxContent.appendChild(placeholder)
     }
 
@@ -91,14 +92,69 @@ export async function initGallery() {
   prevBtn.addEventListener('click', () => navigate(-1))
   nextBtn.addEventListener('click', () => navigate(1))
 
-  lightbox.addEventListener('click', (e) => {
+  lightbox.addEventListener('click', e => {
     if (e.target === lightbox) closeLightbox()
   })
 
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', e => {
     if (lightbox.hidden) return
     if (e.key === 'Escape') closeLightbox()
     if (e.key === 'ArrowLeft') navigate(-1)
     if (e.key === 'ArrowRight') navigate(1)
+  })
+
+  // Touch / swipe support for lightbox navigation
+  let touchStartX = 0
+  let touchStartY = 0
+  let touchMoveX = 0
+  let touchMoveY = 0
+  let isTouching = false
+
+  function onTouchStart(e) {
+    const t = e.touches ? e.touches[0] : e
+    touchStartX = t.clientX
+    touchStartY = t.clientY
+    touchMoveX = touchMoveY = 0
+    isTouching = true
+  }
+
+  function onTouchMove(e) {
+    if (!isTouching) return
+    const t = e.touches ? e.touches[0] : e
+    touchMoveX = t.clientX - touchStartX
+    touchMoveY = t.clientY - touchStartY
+    // If horizontal swipe is dominant, prevent vertical page scroll
+    if (Math.abs(touchMoveX) > Math.abs(touchMoveY)) {
+      e.preventDefault()
+    }
+  }
+
+  function onTouchEnd() {
+    if (!isTouching) return
+    isTouching = false
+    const dx = touchMoveX
+    const dy = touchMoveY
+    const absX = Math.abs(dx)
+    const absY = Math.abs(dy)
+    const SWIPE_MIN = 40 // px
+    if (absX > SWIPE_MIN && absX > absY) {
+      if (dx < 0) navigate(1)
+      else navigate(-1)
+    }
+  }
+
+  // Attach touch handlers to lightbox content when open, and to the image
+  lightbox.addEventListener('touchstart', onTouchStart, { passive: false })
+  lightbox.addEventListener('touchmove', onTouchMove, { passive: false })
+  lightbox.addEventListener('touchend', onTouchEnd)
+  // Pointer fallback for desktops with touch-capable pointers
+  lightbox.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch') onTouchStart(e)
+  })
+  lightbox.addEventListener('pointermove', e => {
+    if (e.pointerType === 'touch') onTouchMove(e)
+  })
+  lightbox.addEventListener('pointerup', e => {
+    if (e.pointerType === 'touch') onTouchEnd(e)
   })
 }

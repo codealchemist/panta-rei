@@ -204,23 +204,60 @@ input[type='range'] {
 
 @media (max-width: 640px) {
   .nav__links {
-    display: none;
+    /* keep in flow as flex but collapsed via max-height for animation */
+    display: flex;
     position: fixed;
-    inset: var(--nav-h) 0 0 0;
+    /* position the menu below the header so the header stays visible */
+    left: 0;
+    right: 0;
+    top: var(--nav-h);
     flex-direction: column;
     gap: 0;
-    background: var(--bg);
-    padding: 24px 32px;
+    background: rgba(13, 13, 13, 0.98);
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    overflow-y: auto;
+    max-height: 0;
+    padding: 0 32px 0 32px;
+    transform: translateY(-6px);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      max-height 320ms ease,
+      transform 220ms var(--transition),
+      opacity 220ms var(--transition),
+      padding 240ms ease;
   }
 
   .nav__links.is-open {
-    display: flex;
+    /* fully expand to viewport height */
+    max-height: 100vh;
+    /* push menu items below the header so the header remains visible */
+    padding-top: calc(var(--nav-h) + 16px);
+    padding-bottom: 24px;
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Force full coverage when open to avoid clipping in some browsers */
+  .nav__links.is-open.force-open {
+    /* force-open should still respect header height */
+    max-height: none !important;
+    height: calc(100vh - var(--nav-h)) !important;
+    top: var(--nav-h) !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding-top: calc(var(--nav-h) + 16px) !important;
+    overflow-y: auto !important;
+    opacity: 1 !important;
   }
 
   .nav__links a {
     font-size: 1.1rem;
     padding: 14px 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    color: var(--text);
   }
 
   .nav__burger {
@@ -349,6 +386,16 @@ input[type='range'] {
     grid-template-rows: auto auto auto;
   }
 
+  /* Add extra right spacing for the vinyl artwork on small screens */
+  .player__artwork {
+    margin-right: 12px;
+  }
+
+  /* Give the player info a little left padding so the vinyl has space */
+  .player__info {
+    padding-left: 10px;
+  }
+
   .player__controls {
     grid-column: 1 / -1;
     justify-content: center;
@@ -368,6 +415,11 @@ input[type='range'] {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+/* Allow the info column to shrink and wrap its contents */
+.player__info {
+  min-width: 0;
 }
 
 .player__artwork-inner {
@@ -392,9 +444,14 @@ input[type='range'] {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Allow wrapping to multiple lines and avoid overflow */
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  min-width: 0;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  display: block;
 }
 
 .player__track-index {
